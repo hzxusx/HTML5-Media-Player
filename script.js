@@ -1,18 +1,20 @@
 /**
- * rev-1.1
+ * rev-1.2
  * require jQuery & jQuery UI.
  * Created by Administrator on 2015/4/15.
  */
+
 
 $(document).ready(function(){
 
 
     //Variable Area
-    var mStatus = true,
+    var cDelayer = null, //click delayer
+        mStatus = true, //media status
+        mContainer = $('#container'),
         mSource = $('#media-source'),
         mControls = $('#html5-controls'),
         mProgress = $('#progress-area'),
-        mZoom = $('#zoom-area'),
         mSound = $('#sound-area'),
         mBar = $('#sound-area .bar'),
         mPlay = $('#play-button .play'),
@@ -32,9 +34,9 @@ $(document).ready(function(){
         }
     }
 
-    function updateSound(sound){
-        mSource[0].volume = (100-sound)/100;
-        mSlider.css({top:(sound*100)/100});
+    function updateSound(dot){
+        mSource[0].volume = (100-dot)/100; //unit: px
+        mSlider.css({top:(dot*100)/100});
     }
 
     function updateDropper(dot){
@@ -61,37 +63,43 @@ $(document).ready(function(){
         }
     }
 
-    function soundArea(){
-        if (mSound.css("display") == 'none'){
-            mSound.show();
-        } else{
-            mSound.hide();
-        }
+    function zoomHandler(){
+        screenStatus() == "full" ? exitFullscreen() : getFullscreen();
     }
 
-    function zoomHandler(){
-        if (document.msFullscreenElement || document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement){
-            exitFullscreen();
+    function screenStatus() {
+        var sCode = null;
+        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) {
+            sCode = "full";
         } else{
-            getFullscreen();
+            sCode = "lite";
         }
+        return sCode;
     }
 
     function getFullscreen(){
-        var e = $('#container')[0];
-        if (e.requestFullscreen) { e.requestFullscreen(); }
-        else if (e.msRequestFullscreen) { e.msRequestFullscreen(); }
-        else if (e.mozRequestFullScreen) { e.mozRequestFullScreen(); }
-        else if (e.webkitRequestFullscreen) { e.webkitRequestFullscreen(); }
-        getFullscreenFallback();
+        var dot = mContainer[0];
+        if (dot.requestFullscreen) {
+            dot.requestFullscreen();
+        } else if (dot.webkitRequestFullscreen) {
+            dot.webkitRequestFullscreen();
+        } else if (dot.mozRequestFullScreen) {
+            dot.mozRequestFullScreen();
+        } else if (dot.msRequestFullscreen) {
+            dot.msRequestFullscreen();
+        }
     }
 
     function exitFullscreen(){
-        exitFullscreenFallback();
-        if (document.exitFullscreen) { document.exitFullscreen(); }
-        else if (document.msExitFullscreen) { document.msExitFullscreen(); }
-        else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
-        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
     }
 
     function getFullscreenFallback(){
@@ -112,22 +120,32 @@ $(document).ready(function(){
         });
     }
 
+    function LeftRightProgress(dot){
+        var duration = mSource[0].duration;
+        if (dot == "left"){
+            mSource[0].currentTime <= 9 ? mSource[0].currentTime = 0 : mSource[0].currentTime -= 9; //unit: s
+        } else if(dot == "right"){
+            mSource[0].currentTime >= (duration-9) ? mSource[0].currentTime = duration : mSource[0].currentTime += 9;
+        }
+    }
+
     function UpDownSound(dot){
         mSound.show(); //must be Ended by ***mSound.hide();***
         var currentPosition = mSlider.position().top; //currentPosition -> [0,100]
-        if (dot == 0){
-            if (currentPosition <= 5){
-                updateSound(0);
-            } else{
-                updateSound(currentPosition - 5);
-            }
-        } else if (dot == 1){
-            if (currentPosition >= 95){
-                updateSound(100);
-            } else{
-                updateSound(currentPosition + 5);
-            }
+        if (dot == "up"){
+            currentPosition <= 5 ? updateSound(0) : updateSound(currentPosition - 5); //unit: px
+        } else if (dot == "down"){
+            currentPosition >= 95 ? updateSound(100) : updateSound(currentPosition + 5);
         }
+    }
+
+    function screenStatusChange(){
+        screenStatus() == "full" ? getFullscreenFallback() : exitFullscreenFallback();
+    }
+
+    function fullscreenError(){
+        var info = "FullScreen ERROR. Please allow the permission of FullScreen OR current browser does not support the way to FullScreen.";
+        alert(info);
     }
 
 
@@ -141,8 +159,7 @@ $(document).ready(function(){
         });
     });
 
-    //Init Volume (Set Default Volume)
-    updateSound(50);
+    updateSound(50); //Init Volume (Set Default Volume); unit: px
 
     mDropper.draggable({
         containment:'parent',
@@ -188,9 +205,9 @@ $(document).ready(function(){
     });
 
     mBar.on('click',function(e){
-        var superTop = $(this).offset().top + 8, //8 is a correction number
+        var superTop = $(this).offset().top + 8,//8 is a correction number; unit: px
             y = e.pageY,
-            top = y - superTop; //top -> [-8,108]. just need [0,100]
+            top = y - superTop; //top -> [-8,108]; just need [0,100]
         if (top <= 0 ){
             top = 0;
         } else if(top >= 100){
@@ -223,26 +240,30 @@ $(document).ready(function(){
 
     //#speaker-area
     $('#speaker-button').on("click",function(){
-        soundArea();
+        mSound.css("display") == 'none' ? mSound.show() : mSound.hide();
     });
 
     //#zoom-area
-    mZoom.on('click',function(){
+    $('#zoom-area').on('click',function(){
         zoomHandler();
     });
 
-    //No Right Click on Video
-    $('#container').bind("contextmenu",function(e){
+    //forbid right click on video
+    mContainer.bind("contextmenu",function(e){
         return false;
     });
 
-    //Click on Video
-    mSource.on("click",function(){
-        playHandler();
+    //click on video
+    mSource.bind("click",function(){
+        clearTimeout(cDelayer);
+        cDelayer = setTimeout(function(){
+            playHandler();
+        }, 300);
     });
 
-    //Double Click on Video
+    //double click on video
     mSource.bind("dblclick",function(){
+        clearTimeout(cDelayer);
         zoomHandler();
     });
 
@@ -252,16 +273,16 @@ $(document).ready(function(){
             case 13: zoomHandler();
                 break; // Enter ×IE
             case 27: exitFullscreen();
-                break; //Esc ×Firefox
+                break; //Esc
             case 32: playHandler();
                 break; //Space
-            case 37:
+            case 37: LeftRightProgress("left");
                 break; //Left Arrow
-            case 38: UpDownSound(0); mSound.hide();
+            case 38: UpDownSound("up"); mSound.hide();
                 break; //Up Arrow
-            case 39:
+            case 39: LeftRightProgress("right");
                 break; //Right Arrow
-            case 40: UpDownSound(1); mSound.hide();
+            case 40: UpDownSound("down"); mSound.hide();
                 break; //Down Arrow
             default:
                 break;
@@ -273,18 +294,29 @@ $(document).ready(function(){
         "loadedmetadata":function(){
             var arr = new Array(2),
                 gTime_1 = mSource[0].duration,
-                time = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
-                gTime_2 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+time).slice(-2);
-            $('#time-area .total').html(gTime_2);
+                gTime_2 = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
+                gTime_3 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+gTime_2).slice(-2);
+            $('#time-area .total').html(gTime_3);
         },
         "timeupdate":function(){
             var arr = new Array(2),
                 gTime_1 = mSource[0].currentTime,
-                time = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
-                gTime_2 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+time).slice(-2);
-            $('#time-area .current').html(gTime_2);
+                gTime_2 = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
+                gTime_3 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+gTime_2).slice(-2);
+            $('#time-area .current').html(gTime_3);
         }
     });
 
+    //listener fullscreen change
+    document.addEventListener("fullscreenchange", screenStatusChange);
+    document.addEventListener("webkitfullscreenchange", screenStatusChange);
+    document.addEventListener("mozfullscreenchange", screenStatusChange);
+    document.addEventListener("MSFullscreenChange", screenStatusChange);
+
+    //listener fullscreen error
+    document.addEventListener("fullscreenerror", fullscreenError);
+    document.addEventListener("webkitfullscreenerror", fullscreenError);
+    document.addEventListener("mozfullscreenerror", fullscreenError);
+    document.addEventListener("MSFullscreenError", fullscreenError);
 
 });

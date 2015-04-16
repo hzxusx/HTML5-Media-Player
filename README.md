@@ -14,16 +14,22 @@
 
 - <kbd>Enter</kbd> 键可以全屏或退出全屏；
 
+- <kbd>←</kbd> 和 <kbd>→</kbd> 键分别可以后退和快进视频，步长是 9 秒；
+
 - <kbd>↑</kbd> 和 <kbd>↓</kbd> 键分别可以增大和降低音量；
 
-#### 已知问题
+#### 其他说明
 
-- 在 IE (11) 浏览器下，<kbd>Enter</kbd> 键无法全屏；
+- 已知在 IE (11) 浏览器下，<kbd>Enter</kbd> 键无法进行全屏操作；
 
-- 在 Firefox (37) 浏览器下，需要按 2 次 <kbd>Esc</kbd> 键才能完全退出全屏；
+- 已测试的浏览器 (Desktop)：Chrome (41)，Firefox (37)，IE (11)；
+
+- **functions.php** 中的部分链接为无效的示例链接；
 
 #### DEMO（演示地址）
 
 - http://www.idongu.com/HTML5-Media-Player/
+
+- http://open.idongu.com/HTML5-Media-Player/
 
 ![image](https://github.com/MinonHeart/HTML5-Media-Player/raw/master/screenshots/demo.png)

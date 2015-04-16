@@ -2,50 +2,9 @@
 <html>
 <head lang="zh-CN">
     <meta charset="UTF-8">
+    
     <title>HTML5 Media Player</title>
 
-    <style>
-        html, body, div, p, a, span, h1 { margin: 0; padding: 0; border: 0; }
-        body {
-            line-height: 0;
-            font-family: "Helvetica Neue", "Segoe UI", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
-            background-color: transparent;
-        }
-        h1 {
-            margin: 24px 0;
-            color: #333;
-            line-height: 1;
-            text-align: center;
-            font-size: 32px;
-            font-weight: normal;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-        video {
-            width: 100%;
-            height: 100%;
-        }
-        a {
-            color: #21B3A3;
-            text-decoration: none;
-            border-bottom: 1px dotted #555;
-        }
-        a:hover {
-            color: #e8554e;
-        }
-        #wrapper {
-            margin: 0 auto;
-            width: 100%;
-            min-width: 640px;
-            max-width: 860px;
-        }
-        #footer {
-            margin: 15px 0;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 2;
-            text-align: center;
-        }
-    </style>
     <link rel="stylesheet" href="style.css">
 
     <script src="js/jquery.min.js"></script>
