@@ -30,6 +30,4 @@
 
 - http://www.idongu.com/HTML5-Media-Player/
 
-- http://open.idongu.com/HTML5-Media-Player/
-
 ![image](https://github.com/MinonHeart/HTML5-Media-Player/raw/master/screenshots/demo.png)

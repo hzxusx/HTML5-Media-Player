@@ -20,7 +20,7 @@
 
         <div id="container">
 
-            <video id="media-source" width="640" height="360" poster="<?php get_media_info('poster'); ?>">
+            <video id="media-source" width="640" height="360" poster="<?php get_media_info('poster'); ?>" preload>
                 <source src="<?php get_media_info('source'); ?>" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
                 Your browser does not support the video tag.
             </video>
