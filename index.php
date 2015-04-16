@@ -53,7 +53,7 @@
 </head>
 
 <body>
-	<?php include 'functions.php'; ?>
+    <?php include 'functions.php'; ?>
 
     <h1><?php get_media_info('title'); ?></h1>
 
