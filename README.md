@@ -14,15 +14,13 @@
 
 - <kbd>Enter</kbd> 键可以全屏或退出全屏；
 
-- <kbd>←</kbd> 和 <kbd>→</kbd> 键分别可以后退和快进视频，步长是 9 秒；
+- <kbd>←</kbd> 和 <kbd>→</kbd> 键分别可以后退和快进视频，步长是 5 秒；
 
 - <kbd>↑</kbd> 和 <kbd>↓</kbd> 键分别可以增大和降低音量；
 
 #### 其他说明
 
-- 已知在 IE (11) 浏览器下，<kbd>Enter</kbd> 键无法进行全屏操作；
-
-- 已测试的浏览器 (Desktop)：Chrome (41)，Firefox (37)，IE (11)；
+- 已测试的桌面浏览器：Chrome (41)，Firefox (37)，IE (11)；
 
 - **functions.php** 中的部分链接为无效的示例链接；
 
