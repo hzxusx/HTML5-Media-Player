@@ -1,12 +1,11 @@
 /**
- * rev-1.2
+ * rev-1.3
  * require jQuery & jQuery UI.
  * Created by Administrator on 2015/4/15.
  */
 
 
 $(document).ready(function(){
-
 
     //Variable Area
     var cDelayer = null, //click delayer
@@ -26,27 +25,22 @@ $(document).ready(function(){
 
 
     //Functions
-    function updateProgress(buff,duration){
-        if (buff.length > 0){
-            var start = buff.start(0),
-                end = buff.end(buff.length-1);
-            $('#progress-area .buffer').css({left:start*mProgress.width()/duration,width:end*mProgress.width()/duration});
-        }
+    function browserType(){
+        var bCode = (!!window.ActiveXObject || "ActiveXObject" in window) ? "+IE" : "-IE";
+        return bCode;
     }
 
-    function updateSound(dot){
-        mSource[0].volume = (100-dot)/100; //unit: px
-        mSlider.css({top:(dot*100)/100});
+    function screenStatus() {
+        var sCode = (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) ? "full" : "lite";
+        return sCode;
     }
 
-    function updateDropper(dot){
-        mComplete.css({width:dot});
+    function screenStatusChange(){
+        screenStatus() == "full" ? getFullscreenFallback() : exitFullscreenFallback();
     }
 
-    function seekMedia(dot){
-        var mid = mSource[0],
-            duration = mid.duration;
-        mid.currentTime = dot*duration/mProgress.width();
+    function fullscreenError(){
+        alert("FullScreen ERROR. Please allow the permission of FullScreen OR current browser does not support the way to FullScreen.");
     }
 
     function playHandler(){
@@ -63,30 +57,32 @@ $(document).ready(function(){
         }
     }
 
+    function timeHandler (param){
+        var second = Math.floor(param - Math.floor(param/60)*60),
+            secondContainer = new Array(2),
+            timeZone = Math.floor(param/60) + ":" + (secondContainer.join(0)+second).slice(-2);
+        return timeZone;
+    }
+
+    function updateSound(position){
+        mSource[0].volume = (100-position) / 100; //unit: px
+        mSlider.css({top:(position*100) / 100});
+    }
+
     function zoomHandler(){
         screenStatus() == "full" ? exitFullscreen() : getFullscreen();
     }
 
-    function screenStatus() {
-        var sCode = null;
-        if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) {
-            sCode = "full";
-        } else{
-            sCode = "lite";
-        }
-        return sCode;
-    }
-
     function getFullscreen(){
-        var dot = mContainer[0];
-        if (dot.requestFullscreen) {
-            dot.requestFullscreen();
-        } else if (dot.webkitRequestFullscreen) {
-            dot.webkitRequestFullscreen();
-        } else if (dot.mozRequestFullScreen) {
-            dot.mozRequestFullScreen();
-        } else if (dot.msRequestFullscreen) {
-            dot.msRequestFullscreen();
+        var wrapper = mContainer[0];
+        if (wrapper.requestFullscreen) {
+            wrapper.requestFullscreen();
+        } else if (wrapper.webkitRequestFullscreen) {
+            wrapper.webkitRequestFullscreen();
+        } else if (wrapper.mozRequestFullScreen) {
+            wrapper.mozRequestFullScreen();
+        } else if (wrapper.msRequestFullscreen) {
+            wrapper.msRequestFullscreen();
         }
     }
 
@@ -120,46 +116,57 @@ $(document).ready(function(){
         });
     }
 
-    function LeftRightProgress(dot){
-        var duration = mSource[0].duration;
-        if (dot == "left"){
-            mSource[0].currentTime <= 9 ? mSource[0].currentTime = 0 : mSource[0].currentTime -= 9; //unit: s
-        } else if(dot == "right"){
-            mSource[0].currentTime >= (duration-9) ? mSource[0].currentTime = duration : mSource[0].currentTime += 9;
+    function updateBuffer(){
+        var duration = mSource[0].duration,
+            buffer = mSource[0].buffered;
+        if (buffer.length > 0){
+            var start = buffer.start(0),
+                end = buffer.end(buffer.length-1);
+            $('#progress-area .buffer').css({left:start*mProgress.width()/duration,width:end*mProgress.width()/duration});
         }
     }
 
-    function UpDownSound(dot){
-        mSound.show(); //must be Ended by ***mSound.hide();***
+    function updateDropper(position){
+        mComplete.css({width:position});
+    }
+
+    function updateComplete(){
+        var currentTime = mSource[0].currentTime,
+            duration = mSource[0].duration,
+            progress = currentTime * mProgress.width() / duration; 
+        mComplete.css({width:progress});
+        mDropper.css({left:progress});
+    }
+
+    function mediaEnded(){
+        mPause.hide();
+        mPlay.show();
+        mDropper.css({left:0});
+        mComplete.css({width:0});
+    }
+
+    function UpDownSound(string){
+        mSound.show();
         var currentPosition = mSlider.position().top; //currentPosition -> [0,100]
-        if (dot == "up"){
+        if (string == "up"){
             currentPosition <= 5 ? updateSound(0) : updateSound(currentPosition - 5); //unit: px
-        } else if (dot == "down"){
+        } else if (string == "down"){
             currentPosition >= 95 ? updateSound(100) : updateSound(currentPosition + 5);
         }
-    }
+    } //must be Ended by ***mSound.hide();***
 
-    function screenStatusChange(){
-        screenStatus() == "full" ? getFullscreenFallback() : exitFullscreenFallback();
-    }
-
-    function fullscreenError(){
-        var info = "FullScreen ERROR. Please allow the permission of FullScreen OR current browser does not support the way to FullScreen.";
-        alert(info);
+    function LeftRightProgress(string){
+        if (string == "left"){
+            mSource[0].currentTime <= 5 ? mSource[0].currentTime = 0 : mSource[0].currentTime -= 5; //unit: s
+        } else if(string == "right"){
+            mSource[0].currentTime >= (mSource[0].duration-5) ? mSource[0].currentTime = mSource[0].duration : mSource[0].currentTime += 5;
+        }
     }
 
 
 
     //Body
-    $(window).load(function(){
-        mSource.bind('progress',function(){
-            var duration = this.duration,
-                buff = this.buffered;
-            updateProgress(buff,duration);
-        });
-    });
-
-    updateSound(50); //Init Volume (Set Default Volume); unit: px
+    updateSound(50); //Init Volume (Set Default Volume); [0,100]; unit: px
 
     mDropper.draggable({
         containment:'parent',
@@ -172,8 +179,9 @@ $(document).ready(function(){
             mSource[0].pause();
         },
         stop:function(){
-            var currentPosition = $(this).position();
-            seekMedia(currentPosition.left);
+            var currentPosition = $(this).position(),
+                duration = mSource[0].duration;
+            mSource[0].currentTime = currentPosition.left * duration / mProgress.width();
             if (!mStatus){
                 mSource[0].play();
             }
@@ -189,23 +197,23 @@ $(document).ready(function(){
         }
     });
 
+    mContainer.on("contextmenu",function(){
+        return false;
+    });
+
     mProgress.on('click',function(e){
-        var mid = mSource[0],
-            duration = mid.duration;
-        mid.pause();
+        var duration = mSource[0].duration; mSource[0].pause();
         var left = $(this).offset().left,
             x = e.pageX,
             start = x-left;
-        mid.currentTime = start*duration/mProgress.width();
-        mComplete.css({width:start});
-        mDropper.css({left:start});
+        mSource[0].currentTime = start * duration / mProgress.width();
         if (!mStatus){
-            mid.play();
+            mSource[0].play();
         }
     });
 
     mBar.on('click',function(e){
-        var superTop = $(this).offset().top + 8,//8 is a correction number; unit: px
+        var superTop = $(this).offset().top + 8, //8 is a correction number; unit: px
             y = e.pageY,
             top = y - superTop; //top -> [-8,108]; just need [0,100]
         if (top <= 0 ){
@@ -218,94 +226,122 @@ $(document).ready(function(){
         updateSound(top);
     });
 
-    mSource.on('timeupdate',function(){
-        var time = this.currentTime,
-            duration = this.duration,
-            progress = time*mProgress.width()/duration;
-        mComplete.css({width:progress});
-        mDropper.css({left:progress});
-    });
-
-    mSource[0].onended = function(){
-        mPause.hide();
-        mPlay.show();
-        mDropper.css({left:0});
-        mComplete.css({width:0});
-    };
-
-    //#play-button
     $('#play-button').on('click',function(){
         playHandler();
     });
 
-    //#speaker-area
     $('#speaker-button').on("click",function(){
         mSound.css("display") == 'none' ? mSound.show() : mSound.hide();
     });
 
-    //#zoom-area
     $('#zoom-area').on('click',function(){
         zoomHandler();
     });
 
-    //forbid right click on video
-    mContainer.bind("contextmenu",function(e){
-        return false;
-    });
-
-    //click on video
-    mSource.bind("click",function(){
-        clearTimeout(cDelayer);
-        cDelayer = setTimeout(function(){
-            playHandler();
-        }, 300);
-    });
-
-    //double click on video
-    mSource.bind("dblclick",function(){
-        clearTimeout(cDelayer);
-        zoomHandler();
-    });
-
     //listen keyboard
-    $(document).keyup(function(e){
-        switch (e.keyCode){
-            case 13: zoomHandler();
-                break; // Enter ×IE
-            case 27: exitFullscreen();
-                break; //Esc
-            case 32: playHandler();
-                break; //Space
-            case 37: LeftRightProgress("left");
-                break; //Left Arrow
-            case 38: UpDownSound("up"); mSound.hide();
-                break; //Up Arrow
-            case 39: LeftRightProgress("right");
-                break; //Right Arrow
-            case 40: UpDownSound("down"); mSound.hide();
-                break; //Down Arrow
-            default:
-                break;
-        }
+    if (browserType() == "+IE"){
+        $(document).on({
+            "keypress":function(event){
+                switch (event.which){
+                    case 13: // Enter
+                        zoomHandler();
+                        break;
+                    default:
+                        break;
+                }
+            },
+            "keydown":function(event){
+                switch (event.which){
+                    case 27: //Esc
+                        exitFullscreen();
+                        break;
+                    case 37: //Left Arrow
+                        LeftRightProgress("left");
+                        break;
+                    case 38: //Up Arrow
+                        UpDownSound("up"); mSound.hide();
+                        break;
+                    case 39: //Right Arrow
+                        LeftRightProgress("right");
+                        break;
+                    case 40: //Down Arrow
+                        UpDownSound("down"); mSound.hide();
+                        break;
+                    default:
+                        break;
+                }
+            },
+            "keyup":function(event){
+                switch (event.which){
+                    case 32: //Space
+                        playHandler();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+    } else if(browserType() == "-IE"){
+        $(document).on('keydown',function(event){
+            switch (event.which){
+                case 13: // Enter
+                    zoomHandler();
+                    break;
+                case 27: //Esc
+                    exitFullscreen();
+                    break;
+                case 32: //Space
+                    playHandler();
+                    break;
+                case 37: //Left Arrow
+                    LeftRightProgress("left");
+                    break;
+                case 38: //Up Arrow
+                    UpDownSound("up"); mSound.hide();
+                    break;
+                case 39: //Right Arrow
+                    LeftRightProgress("right");
+                    break;
+                case 40: //Down Arrow
+                    UpDownSound("down"); mSound.hide();
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    $(window).load(function(){
+        mSource.on({
+            "click":function(){
+                clearTimeout(cDelayer);
+                cDelayer = setTimeout(function(){
+                    playHandler();
+                }, 300);
+            },
+            "dblclick":function(){
+                clearTimeout(cDelayer);
+                zoomHandler();
+            },
+            "ended":function(){
+                mediaEnded();
+            },
+            "progress":function(){
+                updateBuffer();
+            },
+            "timeupdate":function(){
+                updateComplete();
+
+                var param = mSource[0].currentTime;
+                $('#time-area .current').html(timeHandler(param));
+            },
+            "loadedmetadata":function(){
+                var param = mSource[0].duration;
+                $('#time-area .total').html(timeHandler(param));
+            }
+        });
     });
 
-    //#time-area
-    window.onload = mSource.on({
-        "loadedmetadata":function(){
-            var arr = new Array(2),
-                gTime_1 = mSource[0].duration,
-                gTime_2 = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
-                gTime_3 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+gTime_2).slice(-2);
-            $('#time-area .total').html(gTime_3);
-        },
-        "timeupdate":function(){
-            var arr = new Array(2),
-                gTime_1 = mSource[0].currentTime,
-                gTime_2 = Math.floor(gTime_1 - Math.floor(gTime_1/60)*60),
-                gTime_3 = Math.floor(gTime_1/60) + ":" + (arr.join(0)+gTime_2).slice(-2);
-            $('#time-area .current').html(gTime_3);
-        }
-    });
 
     //listener fullscreen change
     document.addEventListener("fullscreenchange", screenStatusChange);
