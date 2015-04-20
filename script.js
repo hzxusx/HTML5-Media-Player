@@ -311,36 +311,36 @@ $(document).ready(function(){
         });
     }
 
-    $(window).load(function(){
-        mSource.on({
-            "click":function(){
-                clearTimeout(cDelayer);
-                cDelayer = setTimeout(function(){
-                    playHandler();
-                }, 300);
-            },
-            "dblclick":function(){
-                clearTimeout(cDelayer);
-                zoomHandler();
-            },
-            "ended":function(){
-                mediaEnded();
-            },
-            "progress":function(){
-                updateBuffer();
-            },
-            "timeupdate":function(){
-                updateComplete();
 
-                var param = mSource[0].currentTime;
-                $('#time-area .current').html(timeHandler(param));
-            },
-            "loadedmetadata":function(){
-                var param = mSource[0].duration;
-                $('#time-area .total').html(timeHandler(param));
-            }
-        });
+    mSource.on({
+        "click":function(){
+            clearTimeout(cDelayer);
+            cDelayer = setTimeout(function(){
+                playHandler();
+            }, 300);
+        },
+        "dblclick":function(){
+            clearTimeout(cDelayer);
+            zoomHandler();
+        },
+        "ended":function(){
+            mediaEnded();
+        },
+        "progress":function(){
+            updateBuffer();
+        },
+        "timeupdate":function(){
+            updateComplete();
+
+            var param = mSource[0].currentTime;
+            $('#time-area .current').html(timeHandler(param));
+        },
+        "loadedmetadata":function(){
+            var param = mSource[0].duration;
+            $('#time-area .total').html(timeHandler(param));
+        }
     });
+
 
 
     //listener fullscreen change
