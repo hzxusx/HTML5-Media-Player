@@ -65,7 +65,7 @@ a:hover {
 /* ----------------------------------------------------- */
 #container {
     width: 100%;
-    height: auto;
+    height: 100%;
 }
 #media-source {
     width: 100%;
