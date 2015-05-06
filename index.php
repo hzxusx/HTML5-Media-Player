@@ -71,9 +71,7 @@
             <div class="clear"></div>
         </div>
 
-        <div id="footer">
-            <p><a href="https://github.com/MinonHeart/HTML5-Media-Player">GitHub</a> === Source Code === <a href="http://me.hub.moe">2B PENCILS</a></p>
-        </div>
+        <div id="footer"></div>
     </div>
 
     <script src="script.js"></script>
