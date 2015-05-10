@@ -1,6 +1,6 @@
 /**
  * @Author: MinonHeart
- * @Author URI: http://me.hub.moe
+ * @Author URI: http://www.ido.moe
  */
 
 
@@ -23,18 +23,8 @@ table { border-collapse: collapse; border-spacing: 0; }
 
 /* ---------------------- [Other] ---------------------- */
 body {
-    line-height: 0;
     font-family: "Helvetica Neue", "Segoe UI", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
-    background-color: transparent;
-}
-h1 {
-    margin: 24px 0;
-    color: #333;
-    line-height: 1;
-    text-align: center;
-    font-size: 32px;
-    font-weight: normal;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    background-color: #fff;
 }
 a {
     color: #21B3A3;
@@ -44,11 +34,22 @@ a {
 a:hover {
     color: #e8554e;
 }
-#wrapper {
+#header {
+    margin: 16px 0;
+    color: #333;
+    font-size: 32px;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+#container {
     margin: 0 auto;
-    width: 100%;
-    min-width: 640px;
-    max-width: 860px;
+    width: 864px;
+    line-height: 0;
+}
+#media-source {
+    width: 864px;
+    height: 486px;
+    background-color: #000;
 }
 #footer {
     margin: 15px 0;
@@ -63,15 +64,6 @@ a:hover {
 /* ----------------------------------------------------- *
  *  Special
 /* ----------------------------------------------------- */
-#container {
-    width: 100%;
-    height: auto; /*Demo Only*/
-}
-#media-source {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-}
 #media-source::-webkit-media-controls {
     display: none;
 }
@@ -148,8 +140,8 @@ a:hover {
     width:0;
     height: 0;
     margin-top: -3px;
-    border-top: 3px solid rgba(119,119,119,1);
-    border-bottom: 3px solid rgba(119,119,119,1);
+    border-top: 3px solid #999;
+    border-bottom: 3px solid #999;
 }
 #progress-area .complete {
     max-width: 100%;
