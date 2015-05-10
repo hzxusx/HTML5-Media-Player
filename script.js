@@ -4,12 +4,11 @@
  * Created by Administrator on 2015/4/15.
  */
 
-
 $(document).ready(function(){
 
     //Variable Area
-    var cDelayer = null, //click delayer
-        mStatus = true, //media status
+    var cDelayer = null, //Click delayer
+        mStatus = false, //Media status
         mContainer = $('#container'),
         mSource = $('#media-source'),
         mControls = $('#html5-controls'),
@@ -22,17 +21,13 @@ $(document).ready(function(){
         mSlider = $('#sound-area .slider'),
         mComplete = $('#progress-area .complete');
 
-
-
     //Functions
     function browserType(){
-        var bCode = (!!window.ActiveXObject || "ActiveXObject" in window) ? "+IE" : "-IE";
-        return bCode;
+        return (!!window.ActiveXObject || "ActiveXObject" in window) ? "+IE" : "-IE";
     }
 
-    function screenStatus() {
-        var sCode = (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) ? "full" : "lite";
-        return sCode;
+    function screenStatus(){
+        return (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) ? "full" : "lite";
     }
 
     function screenStatusChange(){
@@ -40,7 +35,7 @@ $(document).ready(function(){
     }
 
     function fullscreenError(){
-        alert("FullScreen ERROR. Please allow the permission of FullScreen OR current browser does not support the way to FullScreen.");
+        alert("FullScreen ERROR. Please allow the permission of FullScreen OR current browser does not support this way to FullScreen.");
     }
 
     function playHandler(){
@@ -48,29 +43,29 @@ $(document).ready(function(){
             mPlay.hide();
             mPause.show();
             mSource[0].play();
-            mStatus = false;
+            mStatus = true;
         } else{
             mPause.hide();
             mPlay.show();
             mSource[0].pause();
-            mStatus = true;
+            mStatus = false;
         }
     }
 
-    function timeHandler (param){
-        var second = Math.floor(param - Math.floor(param/60)*60),
-            secondContainer = new Array(2),
-            timeZone = Math.floor(param/60) + ":" + (secondContainer.join(0)+second).slice(-2);
-        return timeZone;
-    }
-
-    function updateSound(position){
-        mSource[0].volume = (100-position) / 100; //unit: px
+    function soundHandler(position){
+        mSource[0].volume = (100-position) / 100; //Unit: px
         mSlider.css({top:(position*100) / 100});
     }
 
     function zoomHandler(){
         screenStatus() == "full" ? exitFullscreen() : getFullscreen();
+    }
+
+    function endedHandler(){
+        mPause.hide();
+        mPlay.show();
+        mDropper.css({left:0});
+        mComplete.css({width:0});
     }
 
     function getFullscreen(){
@@ -99,7 +94,8 @@ $(document).ready(function(){
     }
 
     function getFullscreenFallback(){
-        mControls.css({"opacity":"0","position":"fixed"}); //reset
+        mControls.css({"opacity":"0","position":"fixed"}); //Reset
+        mSource.css({"height":"100%","width":"100%"}); mContainer.css({"width":"100%"});
         mControls.hover(function(){
             mControls.css({opacity:1});
         },function(){
@@ -108,7 +104,8 @@ $(document).ready(function(){
     }
 
     function exitFullscreenFallback(){
-        mControls.css({"opacity":"1","position":"relative"}); //reset
+        mControls.css({"opacity":"1","position":"relative"}); //Reset
+        mSource.css({"width":"864","height":"486"}); mContainer.css({"width":"864"});
         mControls.hover(function(){
             mControls.css({opacity:1});
         },function(){
@@ -138,35 +135,33 @@ $(document).ready(function(){
         mDropper.css({left:progress});
     }
 
-    function mediaEnded(){
-        mPause.hide();
-        mPlay.show();
-        mDropper.css({left:0});
-        mComplete.css({width:0});
+    function updateTime(param){
+        var second = Math.floor(param - Math.floor(param/60)*60),
+            secondContainer = new Array(2),
+            timeZone = Math.floor(param/60) + ":" + (secondContainer.join(0)+second).slice(-2);
+        return timeZone;
     }
 
     function UpDownSound(string){
         mSound.show();
         var currentPosition = mSlider.position().top; //currentPosition -> [0,100]
         if (string == "up"){
-            currentPosition <= 5 ? updateSound(0) : updateSound(currentPosition - 5); //unit: px
+            currentPosition <= 5 ? soundHandler(0) : soundHandler(currentPosition - 5); //Unit: px
         } else if (string == "down"){
-            currentPosition >= 95 ? updateSound(100) : updateSound(currentPosition + 5);
+            currentPosition >= 95 ? soundHandler(100) : soundHandler(currentPosition + 5);
         }
     } //must be Ended by ***mSound.hide();***
 
     function LeftRightProgress(string){
         if (string == "left"){
-            mSource[0].currentTime <= 5 ? mSource[0].currentTime = 0 : mSource[0].currentTime -= 5; //unit: s
+            mSource[0].currentTime <= 5 ? mSource[0].currentTime = 0 : mSource[0].currentTime -= 5; //Unit: s
         } else if(string == "right"){
             mSource[0].currentTime >= (mSource[0].duration-5) ? mSource[0].currentTime = mSource[0].duration : mSource[0].currentTime += 5;
         }
     }
 
-
-
     //Body
-    updateSound(50); //Init Volume (Set Default Volume); [0,100]; unit: px
+    soundHandler(35); //Init Volume (Set Default Volume); [0,100]; Unit: px
 
     mDropper.draggable({
         containment:'parent',
@@ -182,7 +177,7 @@ $(document).ready(function(){
             var currentPosition = $(this).position(),
                 duration = mSource[0].duration;
             mSource[0].currentTime = currentPosition.left * duration / mProgress.width();
-            if (!mStatus){
+            if (mStatus){
                 mSource[0].play();
             }
         }
@@ -193,7 +188,7 @@ $(document).ready(function(){
         axis:'y',
         drag:function(){
             var currentPosition = $(this).position();
-            updateSound(currentPosition.top);
+            soundHandler(currentPosition.top);
         }
     });
 
@@ -207,13 +202,13 @@ $(document).ready(function(){
             x = e.pageX,
             start = x-left;
         mSource[0].currentTime = start * duration / mProgress.width();
-        if (!mStatus){
+        if (mStatus){
             mSource[0].play();
         }
     });
 
     mBar.on('click',function(e){
-        var superTop = $(this).offset().top + 8, //8 is a correction number; unit: px
+        var superTop = $(this).offset().top + 8, //8 is a correction number; Unit: px
             y = e.pageY,
             top = y - superTop; //top -> [-8,108]; just need [0,100]
         if (top <= 0 ){
@@ -223,7 +218,7 @@ $(document).ready(function(){
         } else{
             top = y - superTop;
         }
-        updateSound(top);
+        soundHandler(top);
     });
 
     $('#play-button').on('click',function(){
@@ -311,7 +306,6 @@ $(document).ready(function(){
         });
     }
 
-
     mSource.on({
         "click":function(){
             clearTimeout(cDelayer);
@@ -324,7 +318,7 @@ $(document).ready(function(){
             zoomHandler();
         },
         "ended":function(){
-            mediaEnded();
+            endedHandler();
         },
         "progress":function(){
             updateBuffer();
@@ -333,15 +327,13 @@ $(document).ready(function(){
             updateComplete();
 
             var param = mSource[0].currentTime;
-            $('#time-area .current').html(timeHandler(param));
+            $('#time-area .current').html(updateTime(param));
         },
         "loadedmetadata":function(){
             var param = mSource[0].duration;
-            $('#time-area .total').html(timeHandler(param));
+            $('#time-area .total').html(updateTime(param));
         }
     });
-
-
 
     //listener fullscreen change
     document.addEventListener("fullscreenchange", screenStatusChange);
