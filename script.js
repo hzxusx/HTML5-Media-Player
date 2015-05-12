@@ -27,7 +27,7 @@ $(document).ready(function(){
     }
 
     function screenStatus(){
-        return (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement ||document.msFullscreenElement) ? "full" : "lite";
+        return (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) ? "full" : "lite";
     }
 
     function screenStatusChange(){
