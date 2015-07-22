@@ -26,6 +26,6 @@
 
 #### DEMO（演示地址）
 
-- http://open.idongu.com/html5-media-player/
+- http://open.idongu.com/demo/html5-media-player/
 
 ![image](https://github.com/MinonHeart/HTML5-Media-Player/raw/master/screenshots/demo.png)
